@@ -8,7 +8,7 @@ every idea lands here. pillar-tagged. nothing gets built until a sunday review p
 ## the craft
 - mirjam post — QUEUED september
 - adhd-house manifesto (uses shoot assets) — QUEUED august
-- algorythm episode clips (auto-clipped monthly)
+- July: Wk1 origin carousel, Wk2 Algorythm recap #1, Wk3 masking reel, Wk4 Algorythm recap #2. August: Wk1 ADHD-house manifesto, Wk2 Algorythm recap #3, Wk3 Shrine/Ritual Kit case study, Wk4 Algorythm monthly compilation. September: Wk1 Mirjam post, Wk2 Algorythm recap #4, Wk3 NOSEBLIND logline reveal, Wk4 Algorythm monthly + Ritual Kit launch content.
 
 ## ceo era
 - "i built this because i needed it" — shrine/NFC as ritual kit v0, 30-day case study
