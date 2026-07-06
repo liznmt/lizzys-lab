@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>the booth — lizzy's lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=Space+Grotesk:wght@400;500;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f2edf3; --dim:rgba(242,237,243,.55); --faint:rgba(242,237,243,.25);
+    --bg:#07060f; --card:rgba(255,255,255,.045); --line:rgba(255,255,255,.1);
+    --pink:#ff2d9b; --violet:#b48cff; --amber:#e8a13d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    background:
+      radial-gradient(ellipse 90% 45% at 50% -10%, rgba(180,140,255,.16), transparent),
+      radial-gradient(ellipse 60% 30% at 90% 110%, rgba(255,45,155,.1), transparent),
+      var(--bg);
+    color:var(--ink); font-family:'Space Grotesk',system-ui,sans-serif;
+    min-height:100dvh; padding:max(22px,env(safe-area-inset-top)) 20px max(30px,env(safe-area-inset-bottom));
+    max-width:560px; margin:0 auto;
+  }
+  .brand{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--faint);text-align:center}
+  h1{font-family:'Unbounded';font-weight:900;font-size:clamp(30px,8vw,42px);text-transform:lowercase;text-align:center;margin:10px 0 4px;letter-spacing:-.01em}
+  .sub{text-align:center;color:var(--dim);font-size:13.5px;margin-bottom:22px}
+  .sub em{color:var(--violet);font-style:normal}
+  textarea{
+    width:100%;min-height:130px;resize:vertical;
+    background:var(--card);border:1px solid var(--line);border-radius:18px;
+    color:var(--ink);font-family:'Space Grotesk';font-size:16px;line-height:1.55;
+    padding:16px;outline:none;
+  }
+  textarea:focus{border-color:var(--violet)}
+  textarea::placeholder{color:var(--faint)}
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}
+  .mode{
+    border:1px solid var(--line);border-radius:15px;padding:13px 8px;background:transparent;
+    color:var(--dim);cursor:pointer;text-align:center;transition:all .15s;
+  }
+  .mode .ic{font-size:18px;display:block;margin-bottom:5px}
+  .mode .nm{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:lowercase}
+  .mode.on{color:var(--ink);border-color:var(--mc);background:color-mix(in srgb,var(--mc) 10%,transparent);box-shadow:0 0 26px -12px var(--mc)}
+  .mode:nth-child(1){--mc:var(--pink)} .mode:nth-child(2){--mc:var(--violet)} .mode:nth-child(3){--mc:var(--amber)}
+  .go{
+    width:100%;padding:17px;border:none;border-radius:17px;cursor:pointer;
+    background:linear-gradient(100deg,var(--pink),var(--violet));color:#07060f;
+    font-family:'Unbounded';font-weight:700;font-size:14.5px;text-transform:lowercase;
+    box-shadow:0 0 34px rgba(180,140,255,.3);transition:transform .15s,opacity .2s;
+  }
+  .go:active{transform:scale(.985)}
+  .go:disabled{opacity:.45;cursor:default}
+  .out{margin-top:20px;display:flex;flex-direction:column;gap:12px}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;
+    animation:up .35s ease both;
+  }
+  @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card .tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--violet);margin-bottom:9px;display:flex;justify-content:space-between;align-items:center}
+  .card .body{font-size:15.5px;line-height:1.65;white-space:pre-wrap}
+  .copy{
+    font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;
+    background:transparent;border:1px solid var(--line);border-radius:999px;
+    color:var(--dim);padding:5px 12px;cursor:pointer;
+  }
+  .copy:active{border-color:var(--violet);color:var(--violet)}
+  .thinking{
+    text-align:center;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.14em;
+    color:var(--violet);padding:26px 0;text-transform:lowercase;
+  }
+  .thinking::after{content:'';animation:dots 1.2s steps(4) infinite}
+  @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+  .err{color:var(--amber);font-size:13.5px;text-align:center;padding:14px;line-height:1.5}
+  .foot{margin-top:28px;text-align:center;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase}
+</style>
+</head>
+<body>
+  <div class="brand">lizzy's lab · staff, not furniture</div>
+  <h1>the booth</h1>
+  <p class="sub">dump the raw thought — dictate it in the waymo. <em>the booth writes as you, not for you.</em></p>
+
+  <textarea id="dump" placeholder="e.g. 'ok so today melanie asked how my weekend was and i said restful. i played a 2 hour set and slept 4 hours. restful.'"></textarea>
+
+  <div class="modes" id="modes">
+    <button class="mode on" data-m="caption"><span class="ic">⚡</span><span class="nm">caption</span></button>
+    <button class="mode" data-m="monologue"><span class="ic">🎬</span><span class="nm">noseblind</span></button>
+    <button class="mode" data-m="unstick"><span class="ic">🧩</span><span class="nm">unstick</span></button>
+  </div>
+
+  <button class="go" id="go">run it through the booth</button>
+  <div class="out" id="out"></div>
+  <div class="foot">i was never incapable · just uninvited</div>
+
+<script>
+const BRAND = `You are THE BOOTH — the embedded creative brain of Lizzy's Lab, the brand universe of Lizbeth Marquez Torres (DJ Lizzy McWired).
+
+THE UNIVERSE:
+- Thesis: "I was never incapable. Just uninvited." She built the invitation.
+- Double life: legal ops at a major investment firm by day (competent, masked, corporate) / DJ + founder by night. The tension between the two selves IS the brand.
+- Sound: "ADHD house — music that moves the way my brain does."
+- Three pillars: THE CLIMB (origin, masking, double life, the uninvited arc), THE CRAFT (DJ practice, ADHD house, mentors Bruno & Mirjam, Algorythm Radio residency), CEO ERA (Lizzy's Lab as a business, the NFC Ritual Kit, neuro-inclusive tools).
+- She wrote a pilot: NOSEBLIND, half-hour comedy-drama, Fleabag-style direct address to camera, a Waymo as the confessional booth, a check engine light that never gets fixed as the running thesis ("it's still on. so am i."), deadpan, dark-funny, emotionally precise, never self-pitying.
+
+VOICE RULES (non-negotiable):
+- lowercase by default. deadpan. dry. warm underneath.
+- funny before sad, but never jokes AT the pain — jokes NEXT TO it.
+- no toxic positivity, no hustle-bro language, no "girlboss," no hashtag soup.
+- specificity over abstraction: name the object, the time, the street.
+- bilingual sparks welcome (spanish phrases where natural, never performative).
+- never explain the joke. never use the word "journey."
+
+MODES:
+[caption] → Return exactly 3 caption options for the raw input, each on its own numbered block: one for THE CLIMB angle, one for THE CRAFT angle, one for CEO ERA angle (skip a pillar only if truly irrelevant). Each: hook line first (scroll-stopper), then 1-3 short lines, then 3-5 lowercase niche hashtags max. After the 3 options, one line: "file under: [pillar] · [HERO or LAZY]" with a one-clause reason.
+[monologue] → Turn the raw input into a NOSEBLIND direct-address beat: 60-110 words, present tense, spoken to camera, deadpan, ends on a turn (funny-then-true or true-then-funny). Format: slugline-ish setting in caps on line one, then the monologue. This is scene bank material for the series.
+[unstick] → The input is a stuck task, doom pile, or unfinished project. Return: (1) the real reason it's stuck in one non-judgmental sentence, (2) a 10-minute version — exactly 3 physical steps, each startable in under 30 seconds, (3) the "done enough" definition, one line. ADHD-informed: momentum over completeness, no shame, no lectures.
+
+Always answer in the requested mode only. No preamble, no meta-commentary.`;
+
+let mode='caption';
+document.getElementById('modes').addEventListener('click',e=>{
+  const b=e.target.closest('.mode'); if(!b)return;
+  document.querySelectorAll('.mode').forEach(m=>m.classList.remove('on'));
+  b.classList.add('on'); mode=b.dataset.m;
+});
+
+const out=document.getElementById('out');
+const go=document.getElementById('go');
+
+go.addEventListener('click', async ()=>{
+  const dump=document.getElementById('dump').value.trim();
+  if(!dump){out.innerHTML='<div class="err">the booth needs a thought first. even a bad one. especially a bad one.</div>';return}
+  go.disabled=true;
+  out.innerHTML='<div class="thinking">the booth is writing</div>';
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-6",
+        max_tokens:1000,
+        system:BRAND,
+        messages:[{role:"user",content:`MODE: [${mode}]\n\nRAW INPUT:\n${dump}`}]
+      })
+    });
+    const data=await r.json();
+    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim();
+    if(!text) throw new Error('empty');
+    const label={caption:'⚡ captions · pick one, ship it',monologue:'🎬 noseblind · scene bank',unstick:'🧩 unstuck · 10-minute version'}[mode];
+    out.innerHTML=`<div class="card">
+      <div class="tag"><span>${label}</span><button class="copy" id="cp">copy</button></div>
+      <div class="body" id="body"></div>
+    </div>`;
+    document.getElementById('body').textContent=text;
+    document.getElementById('cp').addEventListener('click',()=>{
+      navigator.clipboard.writeText(text).then(()=>{
+        document.getElementById('cp').textContent='copied';
+        setTimeout(()=>{const c=document.getElementById('cp');if(c)c.textContent='copy'},1500);
+      });
+    });
+  }catch(err){
+    out.innerHTML='<div class="err">the booth hit traffic. run it again — the thought is still good.</div>';
+  }
+  go.disabled=false;
+});
+</script>
+</body>
+</html>

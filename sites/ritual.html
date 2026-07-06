@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0508">
+<title>the shrine — lizzy's lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@400;500;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f4eef1; --dim:rgba(244,238,241,.55); --faint:rgba(244,238,241,.28);
+    --bg:#0a0508; --card:rgba(255,255,255,.045); --line:rgba(255,255,255,.1);
+    --accent:#ff2d9b; --accent-soft:rgba(255,45,155,.14); --glow:rgba(255,45,155,.35);
+  }
+  body[data-r="morning"]{ --accent:#ff2d9b; --accent-soft:rgba(255,45,155,.12); --glow:rgba(255,45,155,.4); --bg:#0d060c; }
+  body[data-r="evening"]{ --accent:#e8a13d; --accent-soft:rgba(232,161,61,.12); --glow:rgba(155,89,255,.35); --bg:#0b0712; }
+  body[data-r="night"]{ --accent:#ff7a1a; --accent-soft:rgba(255,122,26,.12); --glow:rgba(255,122,26,.45); --bg:#070403; }
+  body[data-r="ship"]{ --accent:#b48cff; --accent-soft:rgba(180,140,255,.12); --glow:rgba(180,140,255,.4); --bg:#0a0712; }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    min-height:100vh; min-height:100dvh;
+    display:flex; flex-direction:column;
+    padding:max(20px, env(safe-area-inset-top)) 22px max(28px, env(safe-area-inset-bottom));
+    max-width:520px; margin:0 auto;
+    transition:background .6s ease;
+  }
+  body::before{ /* ambient wash */
+    content:""; position:fixed; inset:-40% -40% auto -40%; height:70%;
+    background:radial-gradient(ellipse at 50% 0%, var(--glow), transparent 65%);
+    opacity:.5; pointer-events:none; z-index:0;
+  }
+  main{position:relative; z-index:1; display:flex; flex-direction:column; flex:1}
+  .eyebrow{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim)}
+  .brand{font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:var(--faint); text-align:center; margin-bottom:26px}
+  h1{font-family:'Unbounded',sans-serif; font-weight:900; line-height:.98; letter-spacing:-.01em; text-transform:lowercase}
+  .saint{font-size:clamp(34px,9vw,46px); margin:10px 0 4px; color:var(--ink)}
+  .guards{font-size:13px; color:var(--accent); font-family:'Space Mono',monospace; letter-spacing:.08em}
+  .invocation{
+    margin:26px 0; padding:18px 20px; border-left:2px solid var(--accent);
+    background:var(--accent-soft); border-radius:0 14px 14px 0;
+    font-size:17px; line-height:1.55; font-weight:500;
+  }
+  .invocation em{color:var(--accent); font-style:normal}
+  .list{display:flex; flex-direction:column; gap:10px; margin-bottom:26px}
+  .step{
+    display:flex; align-items:center; gap:14px;
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    padding:15px 16px; font-size:15.5px; cursor:pointer; user-select:none;
+    transition:border-color .2s, opacity .2s;
+  }
+  .step .box{
+    width:24px; height:24px; flex:none; border-radius:8px;
+    border:1.5px solid var(--faint); display:grid; place-items:center;
+    font-size:14px; color:var(--bg); transition:all .2s;
+  }
+  .step.done{border-color:var(--accent); opacity:.65}
+  .step.done .box{background:var(--accent); border-color:var(--accent)}
+  .step.done .txt{text-decoration:line-through; text-decoration-color:var(--accent)}
+  .timerwrap{margin-bottom:26px}
+  .timer{
+    width:100%; padding:16px; border-radius:16px; border:1px dashed var(--line);
+    background:transparent; color:var(--ink); font-family:'Space Mono',monospace;
+    font-size:15px; letter-spacing:.06em; cursor:pointer;
+  }
+  .timer.running{border-style:solid; border-color:var(--accent); color:var(--accent); font-size:28px; font-weight:700}
+  .complete{
+    margin-top:auto; width:100%; padding:18px; border:none; border-radius:18px;
+    background:var(--accent); color:#0a0508;
+    font-family:'Unbounded',sans-serif; font-weight:700; font-size:15px;
+    text-transform:lowercase; letter-spacing:.02em; cursor:pointer;
+    box-shadow:0 0 34px var(--glow); transition:transform .15s, filter .2s;
+  }
+  .complete:active{transform:scale(.98)}
+  .complete:disabled{filter:grayscale(1) brightness(.5); box-shadow:none; cursor:default}
+  .streakbar{display:flex; align-items:center; justify-content:space-between; margin-top:18px}
+  .streak{font-family:'Space Mono',monospace; font-size:12px; color:var(--dim); letter-spacing:.08em}
+  .streak b{color:var(--accent); font-size:16px}
+  .chain{display:flex; gap:5px}
+  .chip{width:9px; height:9px; border-radius:3px; background:var(--line)}
+  .chip.lit{background:var(--accent); box-shadow:0 0 8px var(--glow)}
+  /* check engine light — night signature */
+  .cel{
+    display:flex; flex-direction:column; align-items:center; gap:8px; margin:6px 0 22px;
+  }
+  .cel svg{width:70px; height:52px; filter:drop-shadow(0 0 14px var(--glow))}
+  .cel.dead svg{filter:none; opacity:.22}
+  .cel .cap{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--dim)}
+  /* index screen */
+  .doors{display:flex; flex-direction:column; gap:14px; margin-top:24px}
+  .door{
+    display:block; text-decoration:none; color:var(--ink);
+    background:var(--card); border:1px solid var(--line); border-radius:18px; padding:20px;
+  }
+  .door .when{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--dim)}
+  .door .who{font-family:'Unbounded',sans-serif; font-weight:700; font-size:19px; margin-top:6px; text-transform:lowercase}
+  .door .what{font-size:13.5px; color:var(--dim); margin-top:4px}
+  .m .who{color:#ff2d9b}.e .who{color:#e8a13d}.n .who{color:#ff7a1a}.s .who{color:#b48cff}
+  .door .streaklet{float:right;font-family:'Space Mono',monospace;font-size:11px;color:var(--dim)}.door .streaklet b{color:var(--ink)}
+  .phase{margin:-8px 0 22px;padding:12px 16px;border:1px solid var(--line);border-radius:14px;font-family:'Space Mono',monospace;font-size:12px;line-height:1.6;color:var(--dim)}.phase b{color:var(--accent)}
+  .footer{margin-top:30px; text-align:center; font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.2em; color:var(--faint); text-transform:uppercase}
+  .donebanner{
+    text-align:center; padding:30px 10px; font-family:'Unbounded',sans-serif;
+    font-weight:700; font-size:20px; color:var(--accent); text-transform:lowercase; line-height:1.4;
+  }
+  .donebanner small{display:block; font-family:'Space Grotesk'; font-weight:400; font-size:13px; color:var(--dim); margin-top:10px; text-transform:none}
+  @media (prefers-reduced-motion:no-preference){
+    main{animation:rise .5s ease both}
+    @keyframes rise{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
+    .cel:not(.dead) svg{animation:flicker 4s infinite}
+    @keyframes flicker{0%,92%,96%,100%{opacity:1}94%{opacity:.55}}
+  }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+/* ---------- storage (persists on the deployed site; in-memory fallback elsewhere) ---------- */
+const mem = {};
+const store = {
+  get(k){ try{ return localStorage.getItem(k) ?? mem[k] ?? null }catch(e){ return mem[k] ?? null } },
+  set(k,v){ mem[k]=v; try{ localStorage.setItem(k,v) }catch(e){} }
+};
+const today = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
+const yesterday = () => { const d=new Date(); d.setDate(d.getDate()-1); return d.toLocaleDateString('en-CA') };
+
+/* ---------- the rituals ---------- */
+const RITUALS = {
+  morning: {
+    when:'the first window · before work',
+    saint:'lady gaga',
+    guards:'guards the body — the instrument',
+    invocations:[
+      'the body is the instrument. <em>tune it before the show.</em>',
+      'you don\u2019t need to feel ready. <em>you need to be in motion.</em>',
+      'no smoke in this window. <em>the window belongs to the body now.</em>',
+      'ten minutes. that\u2019s the whole ask. <em>the day earns you after.</em>'
+    ],
+    steps:['dogs out — mokah & kahlo lead','10 min movement: sun, stretch, or the block','water before anything else','no smoke — window replaced, not resisted'],
+    timer:600,
+    timerLabel:'start 10:00 — movement',
+    completeLabel:'instrument tuned',
+    doneLine:'tuned.',
+    doneSub:'the first window is yours again. go be corporate. we know the truth.'
+  },
+  evening: {
+    when:'the second window · arriving home',
+    saint:'kali uchis',
+    guards:'guards the landing — coming home to all of you',
+    invocations:[
+      'you don\u2019t switch selves at the door. <em>you come home to all of them.</em>',
+      'shoes off. mask off. <em>same person, no performance.</em>',
+      'fifteen minutes of reset is the decompression. <em>rotting can wait its turn.</em>',
+      'the space holds you back when you hold the space. <em>one zone. one timer.</em>'
+    ],
+    steps:['shoes off, phone down, greet the dogs','15-min reset: one zone, timer on, stop at the bell','dinner from the roster — no deciding','the day is now allowed to end'],
+    timer:900,
+    timerLabel:'start 15:00 — space reset',
+    completeLabel:'landed',
+    doneLine:'landed.',
+    doneSub:'both feet in koreatown. the office stayed downtown where it belongs.'
+  },
+  night: {
+    when:'21:00 · the jar opens',
+    saint:'lizbeth, 2019',
+    guards:'patron of the pumpkin costume — she filed the article anyway',
+    invocations:[
+      'the jar opens when the day is done. <em>not before. never alone.</em>',
+      'you filed the article from jail. <em>you can put one day down.</em>',
+      'one. shared. with sherman. <em>that\u2019s the whole ritual.</em>',
+      'the check engine light is still on. <em>so are you.</em>'
+    ],
+    steps:['landing ritual happened first','dinner happened first','shared with sherman — never solo','phone across the room after'],
+    timer:null,
+    completeLabel:'file the day',
+    doneLine:'filed.',
+    doneSub:'steady. persistent. refusing to go out. see you at 7:30.',
+    cel:true
+  },
+  ship: {
+    when:'the booth \u00b7 waymo window or couch',
+    saint:'doja cat',
+    guards:'guards shipping \u2014 post it unpolished, let the internet cope',
+    invocations:[
+      'perfection is a tax. <em>you already paid it at the office.</em>',
+      'the algorithm rewards the version of you that presses post. <em>not the one still editing.</em>',
+      'it\u2019s a reel, not a ruling. <em>ship it and skate.</em>',
+      'one post a week keeps the lab lit. <em>this is the post.</em>'
+    ],
+    steps:['pick from the runway \u2014 no new ideas allowed','caption pass: one draft, one read, done','schedule it \u2014 don\u2019t post live, don\u2019t doomscroll after','reply to 5 comments on the last one'],
+    timer:1200,
+    timerLabel:'start 20:00 \u2014 ship window',
+    completeLabel:'shipped',
+    doneLine:'shipped.',
+    doneSub:'unpolished and alive beats perfect and unposted. every time.'
+  }
+};
+
+/* ---------- taper phases ---------- */
+const PHASES = [
+  {until:'2026-08-16', name:'phase 1 \u00b7 consolidate', rule:'one shared joint, end of day only \u2014 after landing + dinner. never before work. never alone.'},
+  {until:'2026-10-01', name:'phase 2 \u00b7 weekends', rule:'fri / sat / sun only. still shared, still end of day. rough sleep for a week or two is chemistry, not failure.'},
+  {until:'2099-01-01', name:'phase 3 \u00b7 occasions', rule:'pre-defined special occasions only. the list is written down. the list is the law.'}
+];
+const currentPhase = () => PHASES.find(p => today() <= p.until);
+
+/* ---------- streaks ---------- */
+function streak(key){
+  const raw = store.get('streak:'+key);
+  return raw ? JSON.parse(raw) : {count:0,last:null};
+}
+function complete(key){
+  const s = streak(key), t = today();
+  if(s.last === t) return s;
+  s.count = (s.last === yesterday()) ? s.count+1 : 1;
+  s.last = t;
+  store.set('streak:'+key, JSON.stringify(s));
+  return s;
+}
+function stepKey(r,i){ return 'step:'+r+':'+today()+':'+i }
+
+/* ---------- render ---------- */
+const app = document.getElementById('app');
+const route = () => (location.hash||'').replace('#','') || 'index';
+
+function celSVG(){
+  return `<svg viewBox="0 0 72 52" fill="none" aria-hidden="true">
+    <path d="M20 14h32c3 0 5 2 5 5v18c0 3-2 5-5 5H46l-4 6-4-6H20c-3 0-5-2-5-5V19c0-3 2-5 5-5Z" stroke="var(--accent)" stroke-width="3"/>
+    <path d="M15 22h-6M15 30h-8M57 22h6M57 30h8M28 14v-5M44 14v-5" stroke="var(--accent)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M30 30l4-8 3 5 3-5 4 8" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+function door(cls,key,when,who,what){
+  const st = streak(key), live = st.last===today()||st.last===yesterday();
+  return `<a class="door ${cls}" href="#${key}"><div class="when">${when}<span class="streaklet">${live&&st.count>0?'<b>'+st.count+'</b> \u2013 lit':'dark'}</span></div><div class="who">${who}</div><div class="what">${what}</div></a>`;
+}
+function renderIndex(){
+  document.body.dataset.r='';
+  app.innerHTML = `
+    <div class="brand">lizzy's lab · the shrine</div>
+    <h1 class="saint" style="font-size:clamp(30px,8vw,40px)">tap a tag.<br>enter a window.</h1>
+    <p style="color:var(--dim);margin-top:12px;font-size:14.5px">three keychains, three saints, three transitions. this page is what they open.</p>
+    <div class="doors">
+      ${door('m','morning','before work','lady gaga','dogs · movement · no smoke — the body is the instrument')}
+      ${door('e','evening','arriving home','kali uchis','shoes off · 15-min reset · dinner — come home to all of you')}
+      ${door('s','ship','the booth · anytime','doja cat','pick · caption · schedule · reply — ship it unpolished')}
+      ${door('n','night','21:00','lizbeth, 2019','the jar opens · shared · never alone — file the day')}
+    </div>
+    <div class="footer">i was never incapable. just uninvited.</div>`;
+}
+
+let tick=null;
+function renderRitual(key){
+  const R = RITUALS[key];
+  document.body.dataset.r = key;
+  const s = streak(key);
+  const doneToday = s.last === today();
+  const inv = R.invocations[ new Date().getDate() % R.invocations.length ];
+  const chips = Array.from({length:7},(_,i)=>`<span class="chip ${i < Math.min(s.count,7) ? 'lit':''}"></span>`).join('');
+
+  app.innerHTML = `
+    <div class="brand">lizzy's lab · the shrine</div>
+    <div class="eyebrow">${R.when}</div>
+    <h1 class="saint">${R.saint}</h1>
+    <div class="guards">${R.guards}</div>
+    ${R.cel ? `<div style="height:14px"></div><div class="cel ${s.count>0?'':'dead'}">${celSVG()}<div class="cap">${s.count>0?'still on':'light it tonight'}</div></div><div class="phase"><b>${currentPhase().name}</b><br>${currentPhase().rule}</div>` : ''}
+    <div class="invocation">${inv}</div>
+    ${doneToday
+      ? `<div class="donebanner">${R.doneLine}<small>${R.doneSub}</small></div>`
+      : `<div class="list">${R.steps.map((t,i)=>{
+            const c = store.get(stepKey(key,i))==='1';
+            return `<div class="step ${c?'done':''}" data-i="${i}" role="checkbox" aria-checked="${c}" tabindex="0"><span class="box">✓</span><span class="txt">${t}</span></div>`;
+          }).join('')}</div>
+        ${R.timer ? `<div class="timerwrap"><button class="timer" id="timer">${R.timerLabel}</button></div>`:''}
+        <button class="complete" id="complete">${R.completeLabel}</button>`
+    }
+    <div class="streakbar">
+      <div class="streak">streak <b>${s.count}</b> day${s.count===1?'':'s'}</div>
+      <div class="chain">${chips}</div>
+    </div>
+    <div class="footer"><a href="#" style="color:inherit;text-decoration:none">← all windows</a></div>`;
+
+  app.querySelectorAll('.step').forEach(el=>{
+    const toggle = ()=>{ const k=stepKey(key,el.dataset.i); store.set(k, store.get(k)==='1'?'0':'1'); renderRitual(key) };
+    el.addEventListener('click',toggle);
+    el.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle()} });
+  });
+
+  const tBtn = document.getElementById('timer');
+  if(tBtn){
+    tBtn.addEventListener('click',()=>{
+      if(tick){clearInterval(tick);tick=null;tBtn.classList.remove('running');tBtn.textContent=R.timerLabel;return}
+      let left = R.timer;
+      tBtn.classList.add('running');
+      const fmt = n => String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+      tBtn.textContent = fmt(left);
+      tick = setInterval(()=>{
+        left--;
+        tBtn.textContent = left>0 ? fmt(left) : 'done. stop where you are.';
+        if(left<=0){clearInterval(tick);tick=null;
+          if(navigator.vibrate) navigator.vibrate([120,60,120]);
+        }
+      },1000);
+    });
+  }
+
+  const cBtn = document.getElementById('complete');
+  if(cBtn){
+    cBtn.addEventListener('click',()=>{
+      complete(key);
+      if(navigator.vibrate) navigator.vibrate(80);
+      renderRitual(key);
+    });
+  }
+}
+
+function render(){
+  if(tick){clearInterval(tick);tick=null}
+  const r = route();
+  RITUALS[r] ? renderRitual(r) : renderIndex();
+  window.scrollTo(0,0);
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="#"]');
+  if(!a) return;
+  e.preventDefault();
+  const h = a.getAttribute('href');
+  if(location.hash === h){ render(); } else { location.hash = h; }
+});
+window.addEventListener('hashchange',render);
+render();
+</script>
+</body>
+</html>

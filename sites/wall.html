@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0508">
+<title>the wall — lizzy's lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@400;500;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f4eef1; --dim:rgba(244,238,241,.5); --faint:rgba(244,238,241,.25);
+    --bg:#0a0508; --card:rgba(255,255,255,.04); --line:rgba(255,255,255,.09);
+    --july:#ff2d9b; --aug:#e8a13d; --sep:#b48cff; --cel:#ff7a1a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    background:
+      radial-gradient(ellipse 80% 40% at 20% -5%, rgba(255,45,155,.14), transparent),
+      radial-gradient(ellipse 70% 35% at 85% -5%, rgba(180,140,255,.12), transparent),
+      var(--bg);
+    color:var(--ink); font-family:'Space Grotesk',system-ui,sans-serif;
+    min-height:100vh; min-height:100dvh;
+    padding:max(22px, env(safe-area-inset-top)) 26px max(22px, env(safe-area-inset-bottom));
+  }
+  .mono{font-family:'Space Mono',monospace}
+  header{display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:8px}
+  .brand{font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.32em; text-transform:uppercase; color:var(--faint)}
+  h1{font-family:'Unbounded'; font-weight:900; font-size:clamp(26px,4.5vw,44px); text-transform:lowercase; line-height:1; letter-spacing:-.01em; margin-top:6px}
+  h1 span{color:var(--july)}
+  .daycount{text-align:right}
+  .daycount .n{font-family:'Unbounded'; font-weight:900; font-size:clamp(30px,5vw,52px); line-height:1}
+  .daycount .of{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.24em; color:var(--dim); text-transform:uppercase}
+  .countdowns{display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 22px}
+  .cd{
+    font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.04em;
+    border:1px solid var(--line); border-radius:999px; padding:9px 16px; color:var(--dim);
+  }
+  .cd b{color:var(--ink)}
+  .cd.hot{border-color:var(--cel); color:var(--cel)} .cd.hot b{color:var(--cel)}
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+  @media(max-width:820px){.grid{grid-template-columns:1fr}}
+  .phase{
+    border:1px solid var(--line); border-radius:20px; padding:18px; background:var(--card);
+    display:flex; flex-direction:column;
+  }
+  .phase.now{border-color:var(--pc); box-shadow:0 0 40px -18px var(--pc)}
+  .phead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:4px}
+  .pmonth{font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--pc)}
+  .pnow{font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--pc); opacity:0}
+  .phase.now .pnow{opacity:1}
+  .pname{font-family:'Unbounded'; font-weight:700; font-size:17px; text-transform:lowercase; margin-bottom:12px}
+  .bar{height:4px; border-radius:2px; background:var(--line); margin-bottom:14px; overflow:hidden}
+  .bar i{display:block; height:100%; background:var(--pc); border-radius:2px; transition:width .3s}
+  .items{display:flex; flex-direction:column; gap:8px}
+  .item{
+    display:flex; gap:11px; align-items:center; padding:11px 12px;
+    border:1px solid var(--line); border-radius:13px; font-size:14px;
+    cursor:pointer; user-select:none; transition:opacity .2s,border-color .2s;
+  }
+  .item .dot{width:18px;height:18px;flex:none;border-radius:6px;border:1.5px solid var(--faint);display:grid;place-items:center;font-size:11px;color:var(--bg)}
+  .item.done{opacity:.5;border-color:var(--pc)}
+  .item.done .dot{background:var(--pc);border-color:var(--pc)}
+  .item.done .t{text-decoration:line-through;text-decoration-color:var(--pc)}
+  .item .due{margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:var(--faint);letter-spacing:.06em;flex:none}
+  .board{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:20px 0;
+  }
+  .stat{border:1px solid var(--line); border-radius:16px; padding:14px 16px; background:var(--card)}
+  .stat .v{font-family:'Unbounded'; font-weight:700; font-size:20px}
+  .stat .k{font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-top:4px; line-height:1.5}
+  .saints{
+    display:flex; gap:8px 18px; flex-wrap:wrap; justify-content:center;
+    font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.1em; color:var(--dim);
+    margin:8px 0 16px;
+  }
+  .saints b{color:var(--ink); font-weight:400}
+  .thesis{
+    text-align:center; font-family:'Unbounded'; font-weight:700;
+    font-size:clamp(15px,2.6vw,22px); text-transform:lowercase; letter-spacing:.01em;
+    padding:18px 10px 6px; line-height:1.5;
+  }
+  .thesis span{color:var(--july)}
+  @media (prefers-reduced-motion:no-preference){
+    body{animation:fade .6s ease both}
+    @keyframes fade{from{opacity:0}to{opacity:1}}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand">lizzy's lab · the wall · jul 4 → oct 1</div>
+    <h1>name your era<span>.</span></h1>
+  </div>
+  <div class="daycount"><div class="n" id="day">—</div><div class="of">of 90</div></div>
+</header>
+
+<div class="countdowns" id="countdowns"></div>
+
+<div class="grid" id="grid"></div>
+
+<div class="board" id="board"></div>
+
+<div class="saints">
+  <span><b>coel</b> · the pilot</span>
+  <span><b>pwb</b> · the pitch</span>
+  <span><b>holographic</b> · the craft</span>
+  <span><b>kali</b> · the shoot</span>
+  <span><b>gaga</b> · the body</span>
+  <span><b>doja</b> · the shipping</span>
+  <span><b>lizbeth '19</b> · everything</span>
+</div>
+
+<div class="thesis">i was never incapable. <span>just uninvited.</span><br>so i built the invitation.</div>
+
+<script>
+/* storage with in-memory fallback (persists once hosted) */
+const mem={};
+const store={
+  get(k){try{return localStorage.getItem(k)??mem[k]??null}catch(e){return mem[k]??null}},
+  set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}}
+};
+const DAY=86400000;
+const today=new Date(); today.setHours(0,0,0,0);
+const d=s=>{const[x,y,z]=s.split('-');return new Date(+x,+y-1,+z)};
+const START=d('2026-07-04'), END=d('2026-10-01');
+
+/* day counter */
+const dayN=Math.min(90,Math.max(0,Math.round((today-START)/DAY)+1));
+document.getElementById('day').textContent=dayN<1?'t-'+Math.abs(dayN-1):dayN;
+
+/* countdowns */
+const cds=[
+  {label:'red fox shoot', date:'2026-07-19', hot:7},
+  {label:'hair decision', date:'2026-07-12', hot:3},
+  {label:'phase 2 · weekends only', date:'2026-08-17', hot:0},
+  {label:'quarterly review', date:'2026-09-30', hot:0},
+];
+document.getElementById('countdowns').innerHTML=cds.map(c=>{
+  const n=Math.round((d(c.date)-today)/DAY);
+  if(n<0)return'';
+  const txt=n===0?'<b>today</b>':`<b>${n}</b> day${n===1?'':'s'}`;
+  return`<div class="cd ${c.hot&&n<=c.hot?'hot':''}">${c.label} · ${txt}</div>`;
+}).join('');
+
+/* phases */
+const PHASES=[
+  {id:'july', month:'july', name:'clear the limbo', color:'var(--july)', from:'2026-07-01', to:'2026-07-31',
+   items:[
+     ['file the LLC + EIN + bank acct','7/15'],
+     ['ship the origin carousel',''],
+     ['hair locked — DIY / bar / sis-in-law','7/12'],
+     ['red fox shoot · 5 looks + video','7/19'],
+     ['email capture page live',''],
+     ['4 posts shipped (1/week)',''],
+   ]},
+  {id:'aug', month:'august', name:'first sellable thing', color:'var(--aug)', from:'2026-08-01', to:'2026-08-31',
+   items:[
+     ['shortcuts sensory pack — $15',''],
+     ['storefront live, link in bio',''],
+     ['sensory setup guide $25 + bundle',''],
+     ['ADHD-house manifesto post',''],
+     ['first 10 sales — pipe works',''],
+     ['taper → weekends only','8/17'],
+   ]},
+  {id:'sep', month:'september', name:'first physical proof', color:'var(--sep)', from:'2026-09-01', to:'2026-10-01',
+   items:[
+     ['15-unit ritual kit pilot batch',''],
+     ['landed-cost sheet — real numbers',''],
+     ['NOSEBLIND pitch pack + 5 targets',''],
+     ['mirjam post — craft stays lit',''],
+     ['launch event + preorders',''],
+     ['quarterly review — data decides','9/30'],
+   ]},
+];
+const key=(p,i)=>'wall:'+p+':'+i;
+function render(){
+  document.getElementById('grid').innerHTML=PHASES.map(P=>{
+    const now=today>=d(P.from)&&today<=d(P.to);
+    const done=P.items.filter((_,i)=>store.get(key(P.id,i))==='1').length;
+    const pct=Math.round(done/P.items.length*100);
+    return`<div class="phase ${now?'now':''}" style="--pc:${P.color}">
+      <div class="phead"><span class="pmonth">${P.month}</span><span class="pnow">← you are here</span></div>
+      <div class="pname">${P.name}</div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="items">${P.items.map((it,i)=>{
+        const c=store.get(key(P.id,i))==='1';
+        return`<div class="item ${c?'done':''}" data-p="${P.id}" data-i="${i}"><span class="dot">✓</span><span class="t">${it[0]}</span>${it[1]?`<span class="due">${it[1]}</span>`:''}</div>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+  const allDone=PHASES.reduce((a,P)=>a+P.items.filter((_,i)=>store.get(key(P.id,i))==='1').length,0);
+  const allTotal=PHASES.reduce((a,P)=>a+P.items.length,0);
+  document.getElementById('board').innerHTML=[
+    [allDone+' / '+allTotal,'deliverables done'],
+    ['12','posts · 1 per week'],
+    ['2 + 1','digital products + bundle'],
+    ['15','ritual kits · pilot batch'],
+    ['100','emails on the list'],
+    ['1','launch event'],
+  ].map(s=>`<div class="stat"><div class="v">${s[0]}</div><div class="k">${s[1]}</div></div>`).join('');
+  document.querySelectorAll('.item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const k=key(el.dataset.p,el.dataset.i);
+      store.set(k,store.get(k)==='1'?'0':'1');
+      render();
+    });
+  });
+}
+render();
+</script>
+</body>
+</html>
